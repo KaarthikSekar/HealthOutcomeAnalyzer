@@ -12,6 +12,13 @@ The objective was to explore how daily dietary habits impact chronic health outc
 such as hypertension, obesity and diabetes — through data engineering, exploratory 
 data analysis, statistical hypothesis testing and machine learning.
 
+<img width="1220" height="673" alt="Screenshot 2026-06-19 at 3 34 20 PM" src="https://github.com/user-attachments/assets/35e25189-4c9e-49f2-8404-a25cea843abd" />
+
+<img width="1220" height="673" alt="Screenshot 2026-06-19 at 3 34 37 PM" src="https://github.com/user-attachments/assets/2e1454d7-5b60-496a-93b8-9bcbce0e04c3" />
+
+<img width="1220" height="673" alt="Screenshot 2026-06-19 at 3 34 32 PM" src="https://github.com/user-attachments/assets/18fcdc4b-e692-4752-a4b5-ca333f031b26" />
+
+
 ---
 
 ## Dataset
