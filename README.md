@@ -1,152 +1,167 @@
-# End-to-End Healthcare Analytics on Snowflake Using NHANES Data
+# Diet & Health Outcome Analyzer
+### End-to-End Healthcare Analytics using CDC NHANES Data on Snowflake
+
+---
 
 ## Project Overview
 
-This project is an end-to-end healthcare analytics solution built entirely on Snowflake using the CDC NHANES (National Health and Nutrition Examination Survey) 2017–2018 dataset.
+This project is an end-to-end healthcare analytics solution built on Snowflake using the 
+CDC NHANES (National Health and Nutrition Examination Survey) 2017–2018 dataset.
 
-The objective was to explore the relationship between dietary habits and health outcomes such as hypertension, obesity, and diabetes through data engineering, exploratory data analysis, statistical hypothesis testing, and machine learning.
-
-A key goal of this project was to gain hands-on experience with Snowflake and understand how modern cloud-native analytics workflows can be performed within a single platform.
+The objective was to explore how daily dietary habits impact chronic health outcomes 
+such as hypertension, obesity and diabetes — through data engineering, exploratory 
+data analysis, statistical hypothesis testing and machine learning.
 
 ---
 
 ## Dataset
 
-**Source:** CDC NHANES 2017–2018
+**Source:** CDC NHANES 2017–2018  
+**Participants:** 19,626 adults  
+**Link:** https://wwwn.cdc.gov/nchs/nhanes/
 
-The project integrates data from four NHANES datasets:
+Four NHANES files merged into one analytical dataset:
 
-- Diet Data
-- Demographics Data
-- Examination Data
-- Laboratory Data
-
-These datasets were merged using participant identifiers to create a unified analytical dataset for downstream analysis and modeling.
+| File | Contents |
+|---|---|
+| Diet | Calories, sodium, fiber, protein, fat, sugar |
+| Demographics | Age, gender, ethnicity |
+| Examination | Blood pressure, BMI, weight, height |
+| Laboratory | HbA1c (diabetes marker) |
 
 ---
 
 ## Tech Stack
 
-### Data Platform
-- Snowflake
-- Snowflake Notebooks
-- Virtual Warehouses
-
-### Data Engineering
-- SQL
-
-### Data Analysis & Statistics
-- Python
-- Pandas
-- SciPy
-
-### Machine Learning
-- Scikit-Learn
-  - Random Forest Classifier
-  - Model Evaluation
-  - Feature Importance Analysis
-
-### Visualization
-- Matplotlib
+| Layer | Tools |
+|---|---|
+| Data Platform | Snowflake, Snowflake Notebooks, Virtual Warehouses |
+| Data Engineering | SQL |
+| Analysis & Statistics | Python, Pandas, SciPy |
+| Machine Learning | Scikit-learn |
+| Visualization | Matplotlib, Power BI |
 
 ---
 
 ## Project Workflow
 
-### 1. Data Engineering
-
-- Loaded raw NHANES datasets into Snowflake tables
-- Merged datasets using SQL joins on participant IDs
-- Performed data cleaning and preprocessing
-- Engineered analytical features directly in SQL
-
-Features created:
-
-- Hypertension Flag
-- Diabetes Flag
-- BMI Category
+### 1. Data Engineering (warehouse.sql)
+- Loaded 4 raw NHANES CSV files into Snowflake tables
+- Merged all 4 tables using SQL JOIN on participant ID (SEQN)
+- Engineered 3 derived columns directly in SQL:
+  - **Hypertension Flag** — Systolic BP ≥ 130 or Diastolic BP ≥ 80
+  - **Diabetes Flag** — HbA1c ≥ 6.5%
+  - **BMI Category** — Underweight / Normal / Overweight / Obese
 
 ---
 
-### 2. Exploratory Data Analysis
+### 2. Exploratory Data Analysis (eda.ipynb)
 
-Exploratory analysis was conducted using SQL and Snowflake Notebooks to understand participant demographics, dietary patterns, and health outcomes.
+Key findings from 19,626 participants:
 
-#### Key Findings
+- **57.5%** exceed the recommended daily sodium limit of 2,300mg
+- Average sodium intake: **3,178mg/day** (38% above the limit)
+- Average fiber intake: **15.28g/day** (recommended is 25–38g)
+- Average daily calories: **1,964**
 
-- 74.8% of participants exceeded the recommended daily sodium intake of 2,300 mg
-- Average macronutrient distribution:
-  - Carbohydrates: 50.5%
-  - Fat: 33.8%
-  - Protein: 15.7%
-- Obesity was the largest BMI category, representing 31.6% of participants
+**BMI Distribution:**
+| Category | Count | % |
+|---|---|---|
+| Obese | 6,210 | 31.6% |
+| Normal | 5,604 | 28.6% |
+| Overweight | 4,198 | 21.4% |
+| Underweight | 3,614 | 18.4% |
 
----
-
-### 3. Statistical Analysis
-
-Statistical hypothesis testing was performed using Python and SciPy within Snowflake Notebooks.
-
-#### Tests Conducted
-
-- Independent T-Test
-- One-Way ANOVA
-- Chi-Square Test
-
-#### Findings
-
-- BMI differs significantly across age groups
-- Obese participants consume significantly less fiber
-- Sodium intake alone was not a statistically significant predictor of hypertension
+**Average Macro Split:**
+| Macro | % of Calories |
+|---|---|
+| Carbohydrates | 50.42% |
+| Fat | 34.40% |
+| Protein | 15.18% |
 
 ---
 
-### 4. Machine Learning
+### 3. Statistical Hypothesis Testing (stats.ipynb)
 
-A Random Forest Classifier was developed to predict hypertension risk.
+5 formal tests conducted using SciPy:
 
-#### Features Used
+| # | Test | Hypothesis | p-value | Result |
+|---|---|---|---|---|
+| 1 | T-test | Sodium differs between hypertension groups | 0.013 | ✅ Significant |
+| 2 | T-test | High sodium affects BMI | 0.682 | ❌ Not Significant |
+| 3 | ANOVA | BMI differs across age groups | <0.001 | ✅ Significant |
+| 4 | Chi-square | High sodium linked to hypertension | 0.001 | ✅ Significant |
+| 5 | T-test | Obese people eat less fiber | <0.001 | ✅ Significant |
 
-- Sodium Intake
-- Calories
-- Fiber
-- BMI
-- Age
-- Protein
-- Fat
-- Gender
-- Ethnicity
-- Weight
-- Height
+**4 out of 5 tests confirmed statistically significant diet-health relationships.**
 
-#### Model Performance
+---
 
-| Metric | Value |
-|----------|----------|
-| Accuracy | 93.5% |
-| Recall | 86% |
+### 4. Machine Learning (mlmodel.ipynb)
 
-#### Top Predictors
+**Target:** Predict hypertension risk (binary classification)
 
-1. BMI
-2. Age
-3. Weight
+**Features used:** Sodium, Calories, Fiber, BMI, Age, Protein, Fat, Gender, Ethnicity, Weight, Height
 
-These variables were identified as the most influential features in predicting hypertension.
+**3 models compared:**
+
+| Model | Accuracy | Precision | Recall | F1 Score | AUC |
+|---|---|---|---|---|---|
+| Random Forest | 77.20% | 58.27% | 88.08% | 70.14% | 88.40% |
+| Gradient Boosting | 77.16% | 64.91% | 54.17% | 59.05% | 84.62% |
+| Logistic Regression | 74.98% | 56.13% | 81.02% | 66.32% | 82.54% |
+
+**Winner: Random Forest** — highest AUC (88.40%) and Recall (88.08%)
+
+**Note on overfitting:**  
+Initial Random Forest showed 100% training accuracy vs 93.5% test accuracy — 
+a 6.47% gap indicating overfitting. Fixed by applying max_depth=10 and 
+min_samples_leaf=5, reducing the gap to 4.06%.
+
+**Class imbalance:**  
+Dataset has mild imbalance (79% No Hypertension / 21% Hypertension). 
+Handled using class_weight='balanced' across all models.
+
+**Top predictors of hypertension:**
+1. Age
+2. Weight
+3. Fiber intake
+4. BMI
+5. Calories
 
 ---
 
 ## Snowflake Components Used
 
-This project was developed entirely within Snowflake using:
-
+This project was developed entirely within Snowflake:
 - Snowflake Tables
 - SQL Worksheets
-- Snowflake Virtual Warehouse
+- Virtual Warehouse
 - Snowflake Notebooks
 - Python Runtime Environment
 
-This allowed data engineering, analytics, statistical testing, and machine learning workflows to be executed without moving data across platforms.
+No data was moved across platforms — engineering, analysis, statistics 
+and machine learning all run within Snowflake.
+
+---
+
+## Power BI Dashboard
+
+3 page interactive dashboard built in Power BI:
+
+- **Page 1 — Overview:** KPI cards, hypertension distribution, BMI breakdown, age group distribution, macro split
+- **Page 2 — Diet vs Health Stats:** Hypothesis results table, fiber vs obesity, BMI across age groups, sodium vs hypertension scatter plot  
+- **Page 3 — ML Dashboard:** Model comparison, confusion matrix, feature importance
+
+---
+
+## Key Takeaways
+
+- 57.5% of Americans consume more sodium than the safe daily limit
+- Obese individuals eat significantly less fiber — statistically proven
+- BMI increases significantly with age across all groups
+- Hypertension is multifactorial — age and weight matter more than sodium alone
+- Diet data combined with physical measurements can predict hypertension risk
 
 ---
 
@@ -154,9 +169,17 @@ This allowed data engineering, analytics, statistical testing, and machine learn
 
 ```text
 .
-├── warehouse.sql
-├── eda.ipynb
-├── stats.ipynb
-├── mlmodel.ipynb
-├── README.md
-└── dashboard/
+├── warehouse.sql       ← Snowflake setup, SQL joins, feature engineering
+├── eda.ipynb           ← Exploratory data analysis and visualizations  
+├── stats.ipynb         ← Statistical hypothesis testing
+├── mlmodel.ipynb       ← Machine learning models and evaluation
+└── README.md
+```
+
+---
+
+## Dataset Citation
+
+Centers for Disease Control and Prevention (CDC). National Health and Nutrition 
+Examination Survey Data. Hyattsville, MD: U.S. Department of Health and Human 
+Services, 2017-2018. Available at: https://wwwn.cdc.gov/nchs/nhanes/
